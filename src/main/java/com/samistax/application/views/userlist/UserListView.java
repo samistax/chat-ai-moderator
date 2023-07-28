@@ -1,6 +1,9 @@
 package com.samistax.application.views.userlist;
 
 import com.samistax.application.views.MainLayout;
+import com.samistax.application.views.chat.ChatView;
+import com.vaadin.flow.component.DetachEvent;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Div;
@@ -10,15 +13,17 @@ import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.router.AfterNavigationEvent;
-import com.vaadin.flow.router.AfterNavigationObserver;
-import com.vaadin.flow.router.PageTitle;
-import com.vaadin.flow.router.Route;
+import com.vaadin.flow.data.provider.ListDataProvider;
+import com.vaadin.flow.router.*;
+import com.vaadin.flow.server.VaadinSession;
+
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
-@PageTitle("User List")
+@PageTitle("Select User")
 @Route(value = "user-list", layout = MainLayout.class)
+@RouteAlias(value = "", layout = MainLayout.class)
 public class UserListView extends Div implements AfterNavigationObserver {
 
     Grid<Person> grid = new Grid<>();
@@ -29,6 +34,10 @@ public class UserListView extends Div implements AfterNavigationObserver {
         grid.setHeight("100%");
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER, GridVariant.LUMO_NO_ROW_BORDERS);
         grid.addComponentColumn(person -> createCard(person));
+        grid.addItemClickListener( e -> {
+            VaadinSession.getCurrent().setAttribute(Person.class, e.getItem());
+            UI.getCurrent().navigate(ChatView.class);
+        });
         add(grid);
     }
 
@@ -89,60 +98,65 @@ public class UserListView extends Div implements AfterNavigationObserver {
 
         // Set some data when this view is displayed.
         List<Person> persons = Arrays.asList( //
-                createPerson("https://randomuser.me/api/portraits/men/42.jpg", "John Smith", "May 8",
+                createPerson(1, "https://randomuser.me/api/portraits/men/42.jpg", "John Smith", "May 8",
                         "In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document without relying on meaningful content (also called greeking).",
                         "1K", "500", "20"),
-                createPerson("https://randomuser.me/api/portraits/women/42.jpg", "Abagail Libbie", "May 3",
+                createPerson(2, "https://randomuser.me/api/portraits/women/42.jpg", "Abagail Libbie", "May 3",
                         "In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document without relying on meaningful content (also called greeking).",
                         "1K", "500", "20"),
-                createPerson("https://randomuser.me/api/portraits/men/24.jpg", "Alberto Raya", "May 3",
+                createPerson(3, "https://randomuser.me/api/portraits/men/24.jpg", "Alberto Raya", "May 3",
 
                         "In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document without relying on meaningful content (also called greeking).",
                         "1K", "500", "20"),
-                createPerson("https://randomuser.me/api/portraits/women/24.jpg", "Emmy Elsner", "Apr 22",
+                createPerson(4, "https://randomuser.me/api/portraits/women/24.jpg", "Emmy Elsner", "Apr 22",
 
                         "In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document without relying on meaningful content (also called greeking).",
                         "1K", "500", "20"),
-                createPerson("https://randomuser.me/api/portraits/men/76.jpg", "Alf Huncoot", "Apr 21",
+                createPerson(5, "https://randomuser.me/api/portraits/men/76.jpg", "Alf Huncoot", "Apr 21",
 
                         "In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document without relying on meaningful content (also called greeking).",
                         "1K", "500", "20"),
-                createPerson("https://randomuser.me/api/portraits/women/76.jpg", "Lidmila Vilensky", "Apr 17",
+                createPerson(6, "https://randomuser.me/api/portraits/women/76.jpg", "Lidmila Vilensky", "Apr 17",
 
                         "In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document without relying on meaningful content (also called greeking).",
                         "1K", "500", "20"),
-                createPerson("https://randomuser.me/api/portraits/men/94.jpg", "Jarrett Cawsey", "Apr 17",
+                createPerson(7, "https://randomuser.me/api/portraits/men/94.jpg", "Jarrett Cawsey", "Apr 17",
                         "In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document without relying on meaningful content (also called greeking).",
                         "1K", "500", "20"),
-                createPerson("https://randomuser.me/api/portraits/women/94.jpg", "Tania Perfilyeva", "Mar 8",
+                createPerson(7, "https://randomuser.me/api/portraits/women/94.jpg", "Tania Perfilyeva", "Mar 8",
 
                         "In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document without relying on meaningful content (also called greeking).",
                         "1K", "500", "20"),
-                createPerson("https://randomuser.me/api/portraits/men/16.jpg", "Ivan Polo", "Mar 5",
+                createPerson(9, "https://randomuser.me/api/portraits/men/16.jpg", "Ivan Polo", "Mar 5",
 
                         "In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document without relying on meaningful content (also called greeking).",
                         "1K", "500", "20"),
-                createPerson("https://randomuser.me/api/portraits/women/16.jpg", "Emelda Scandroot", "Mar 5",
+                createPerson(10, "https://randomuser.me/api/portraits/women/16.jpg", "Emelda Scandroot", "Mar 5",
 
                         "In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document without relying on meaningful content (also called greeking).",
                         "1K", "500", "20"),
-                createPerson("https://randomuser.me/api/portraits/men/67.jpg", "Marcos Sá", "Mar 4",
+                createPerson(11,"https://randomuser.me/api/portraits/men/67.jpg", "Marcos Sá", "Mar 4",
 
                         "In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document without relying on meaningful content (also called greeking).",
                         "1K", "500", "20"),
-                createPerson("https://randomuser.me/api/portraits/women/67.jpg", "Jacqueline Asong", "Mar 2",
+                createPerson(12, "https://randomuser.me/api/portraits/women/67.jpg", "Jacqueline Asong", "Mar 2",
 
                         "In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document without relying on meaningful content (also called greeking).",
                         "1K", "500", "20")
 
         );
-
         grid.setItems(persons);
+        // Set first user in the list as default user, in case user is not manually selected.
+        VaadinSession.getCurrent().setAttribute(Person.class, persons.get(0));
+        grid.select(persons.get(0));
+
     }
 
-    private static Person createPerson(String image, String name, String date, String post, String likes,
+    private static Person createPerson(int colorIndex, String image, String name, String date, String post, String likes,
             String comments, String shares) {
         Person p = new Person();
+        p.setId(""+colorIndex);
+        p.setColorIndex(colorIndex);
         p.setImage(image);
         p.setName(name);
         p.setDate(date);
@@ -153,5 +167,15 @@ public class UserListView extends Div implements AfterNavigationObserver {
 
         return p;
     }
-
+    /*
+    @Override
+    protected void onDetach(DetachEvent detachEvent) {
+        super.onDetach(detachEvent);
+        // If user does not choose a user, then use first user in the list as default.
+        var dataProvider = (ListDataProvider<Person>) grid.getDataProvider();
+        Person item = dataProvider.getItems().stream().findFirst().get();
+        VaadinSession.getCurrent().setAttribute(Person.class, item);
+        grid.select(item);
+    }
+     */
 }

@@ -78,6 +78,39 @@
             <artifactId>vaadin-testbench-junit5</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <!-- Project specific dependencies -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-cassandra</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.pulsar</groupId>
+            <artifactId>spring-pulsar-spring-boot-starter</artifactId>
+            <version>0.2.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.datastax.oss</groupId>
+            <artifactId>java-driver-core</artifactId>
+            <version>4.17.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.datastax.astra</groupId>
+            <!--artifactId>astra-spring-boot-starter</artifactId-->
+            <artifactId>astra-spring-boot-3x-starter</artifactId>
+            <version>0.6.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.theokanning.openai-gpt3-java</groupId>
+            <artifactId>service</artifactId>
+            <version>0.14.0</version>
+        </dependency>
+
     </dependencies>
 
     <build>

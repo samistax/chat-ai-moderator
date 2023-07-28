@@ -50,9 +50,8 @@ public class MainLayout extends AppLayout {
 
     private SideNav createNavigation() {
         SideNav nav = new SideNav();
-
-        nav.addItem(new SideNavItem("Chat", ChatView.class, LineAwesomeIcon.COMMENTS.create()));
         nav.addItem(new SideNavItem("User List", UserListView.class, LineAwesomeIcon.USER_FRIENDS_SOLID.create()));
+        nav.addItem(new SideNavItem("Chat", ChatView.class, LineAwesomeIcon.COMMENTS.create()));
 
         return nav;
     }

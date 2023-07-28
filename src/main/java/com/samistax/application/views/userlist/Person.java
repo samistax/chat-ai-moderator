@@ -2,11 +2,13 @@ package com.samistax.application.views.userlist;
 
 public class Person {
 
+    private String id;
     private String image;
     private String name;
     private String date;
     private String post;
     private String likes;
+    private int colorIndex;
     private String comments;
     private String shares;
 
@@ -67,5 +69,21 @@ public class Person {
 
     public void setShares(String shares) {
         this.shares = shares;
+    }
+
+    public int getColorIndex() {
+        return colorIndex;
+    }
+
+    public void setColorIndex(int colorIndex) {
+        this.colorIndex = colorIndex;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 }

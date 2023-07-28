@@ -1,11 +1,10 @@
 package com.samistax.application.views.chat;
 
+import com.samistax.application.service.ChatMessagePersister;
+import com.samistax.application.service.ChatMsgConsumer;
 import com.samistax.application.views.MainLayout;
-import com.vaadin.collaborationengine.CollaborationAvatarGroup;
-import com.vaadin.collaborationengine.CollaborationMessageInput;
-import com.vaadin.collaborationengine.CollaborationMessageList;
-import com.vaadin.collaborationengine.MessageManager;
-import com.vaadin.collaborationengine.UserInfo;
+import com.samistax.application.views.userlist.Person;
+import com.vaadin.collaborationengine.*;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.html.Aside;
 import com.vaadin.flow.component.html.H3;
@@ -20,6 +19,7 @@ import com.vaadin.flow.component.tabs.Tabs.Orientation;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
+import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.theme.lumo.LumoUtility.AlignItems;
 import com.vaadin.flow.theme.lumo.LumoUtility.Background;
 import com.vaadin.flow.theme.lumo.LumoUtility.BoxSizing;
@@ -35,7 +35,7 @@ import java.util.UUID;
 
 @PageTitle("Chat")
 @Route(value = "chat", layout = MainLayout.class)
-@RouteAlias(value = "", layout = MainLayout.class)
+//@RouteAlias(value = "", layout = MainLayout.class)
 public class ChatView extends HorizontalLayout {
 
     public static class ChatTab extends Tab {
@@ -90,7 +90,14 @@ public class ChatView extends HorizontalLayout {
     private ChatInfo currentChat = chats[0];
     private Tabs tabs;
 
-    public ChatView() {
+    private ChatMessagePersister messagePersister;
+    private ChatMsgConsumer consumer;
+
+    public ChatView(ChatMessagePersister messagePersister, ChatMsgConsumer consumer) {
+
+        this.messagePersister = messagePersister;
+        this.consumer = consumer;
+
         addClassNames("chat-view", Width.FULL, Display.FLEX, Flex.AUTO);
         setSpacing(false);
 
@@ -100,8 +107,17 @@ public class ChatView extends HorizontalLayout {
         // identifier, and the user's real name. You can also provide the users
         // avatar by passing an url to the image as a third parameter, or by
         // configuring an `ImageProvider` to `avatarGroup`.
-        UserInfo userInfo = new UserInfo(UUID.randomUUID().toString(), "Steve Lange");
-
+        UserInfo userInfo = null;
+        // Create user info from currently selected user
+        Person userListPerson = VaadinSession.getCurrent().getAttribute(Person.class);
+        if ( userListPerson != null ) {
+            userInfo = new UserInfo(userListPerson.getId().toString(), userListPerson.getName());
+            userInfo.setColorIndex(userListPerson.getColorIndex());
+            userInfo.setImage(userListPerson.getImage());
+        } else {
+            System.out.println("No user selected from list" );
+            userInfo = new UserInfo("0", "AI Moderator");
+        }
         tabs = new Tabs();
         for (ChatInfo chat : chats) {
             // Listen for new messages in each chat so we can update the
@@ -123,7 +139,10 @@ public class ChatView extends HorizontalLayout {
         // the current user using the component, and a topic Id. Topic id can be
         // any freeform string. In this template, we have used the format
         // "chat/#general".
-        CollaborationMessageList list = new CollaborationMessageList(userInfo, currentChat.getCollaborationTopic());
+        CollaborationMessageList list = new CollaborationMessageList(
+                userInfo,
+                currentChat.getCollaborationTopic(),
+                messagePersister);
         list.setSizeFull();
 
         // `CollaborationMessageInput is a textfield and button, to be able to
@@ -133,8 +152,10 @@ public class ChatView extends HorizontalLayout {
         CollaborationMessageInput input = new CollaborationMessageInput(list);
         input.setWidthFull();
 
-        // Layouting
+        // Give CollaborationEngine handle for consumer to publish messages
+        this.consumer.setCe(CollaborationEngine.getInstance());
 
+        // Layouting
         VerticalLayout chatContainer = new VerticalLayout();
         chatContainer.addClassNames(Flex.AUTO, Overflow.HIDDEN);
 
