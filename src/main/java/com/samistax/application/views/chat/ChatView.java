@@ -85,8 +85,8 @@ public class ChatView extends HorizontalLayout {
         }
     }
 
-    private ChatInfo[] chats = new ChatInfo[]{new ChatInfo("general", 0), new ChatInfo("support", 0),
-            new ChatInfo("casual", 0)};
+    private ChatInfo[] chats = new ChatInfo[]{new ChatInfo("default", 0), new ChatInfo("finetuned", 0),
+            new ChatInfo("ChatBot", 0)};
     private ChatInfo currentChat = chats[0];
     private Tabs tabs;
 

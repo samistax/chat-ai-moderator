@@ -14,7 +14,8 @@ Rule 5: You don’t have to use your real name to use Reddit, but don’t impers
 Rule 6: Ensure people have predictable experiences on Reddit by properly labeling content and communities, particularly content that is graphic, sexually-explicit, or offensive.
 Rule 7: Keep it legal, and avoid posting illegal content or soliciting or facilitating illegal or prohibited transactions.
 Rule 8: Don’t break the site or do anything that interferes with normal use of Reddit.
-Enforcement
+
+Enforcement actions
 We have a variety of ways of enforcing our rules, including, but not limited to
 - Asking you nicely to knock it off
 - Asking you less nicely

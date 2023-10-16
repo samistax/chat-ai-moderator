@@ -40,12 +40,18 @@ public class ChatMessageService {
         return response;
     }
     public List<ChatMsg> findAllMessagesSince(String topic, Instant timestamp) {
+
+        System.out.println("findAllMessagesSince. Timestamp: " + timestamp );
         long startTime = System.currentTimeMillis();
         List<ChatMsg> test = repository.findByKeyTopicAndKeyTime(topic, timestamp);
         List<ChatMsg> response = repository.findByKeyTopicAndKeyTimeAfter(topic, timestamp);
         printRequestDuration("findAllMessagesSince("+topic+"): ", startTime);
+        if ( test.size() > 0) {
+            System.out.println("Fetched exact match" + test.get(0).getKey().getTime());
+        }
         // workaround for JPA not having equal or after convention
         response.addAll(test);
+        System.out.println("findAllMessagesSince returned  " +response.size() + " messages!!!" );
         return response;
     }
 

@@ -19,13 +19,14 @@ public class OpenAIClient {
     @Value( "${openai.apikey}" )
     private String OPENAI_API_KEY;
 
+
     private OpenAiService service;
 
     public OpenAIClient() {}
 
     private void initService() {
         if ( service == null) {
-            service = new OpenAiService(OPENAI_API_KEY, Duration.ofSeconds(20L));
+            service = new OpenAiService(OPENAI_API_KEY, Duration.ofSeconds(60L));
         }
     }
     public String getTextEmbedding(String text) {
@@ -63,7 +64,12 @@ public class OpenAIClient {
         ModerationRequest req = ModerationRequest.builder()
                 .model("text-moderation-latest")
                 .input(testToBeModarated).build();
-
         return service.createModeration(req);
     }
+    public OpenAiService getService() {
+        // Ensure service handle is created
+        initService();
+        return service;
+    }
+
 }
