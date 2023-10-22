@@ -11,7 +11,7 @@
 
     <properties>
         <java.version>17</java.version>
-        <vaadin.version>24.1.4</vaadin.version>
+        <vaadin.version>24.2.0</vaadin.version>
         <selenium.version>4.10.0</selenium.version>
     </properties>
 
@@ -109,6 +109,22 @@
             <groupId>com.theokanning.openai-gpt3-java</groupId>
             <artifactId>service</artifactId>
             <version>0.16.0</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.apache.pdfbox/pdfbox -->
+        <dependency>
+            <groupId>org.apache.pdfbox</groupId>
+            <artifactId>pdfbox</artifactId>
+            <version>2.0.29</version>
+        </dependency>
+        <dependency>
+            <groupId>com.datastax.astra</groupId>
+            <artifactId>astra-sdk</artifactId>
+            <version>0.7.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.datastax.astra</groupId>
+            <artifactId>astra-sdk-vector</artifactId>
+            <version>0.7.0</version>
         </dependency>
 
     </dependencies>

@@ -1,7 +1,19 @@
-# Chat AI Moderator
+# Gen AI Demo Project
 
-This project can be used as a starting point to create your own Vaadin application with Spring Boot.
-It contains all the necessary configuration and some placeholder files to get you started.
+This project can be used as a starting point to demonstrate gen AI and Astra platform capabilities (Astra DB, Astra Streaming, Astra Vector Store).
+
+This project uses Vaadin Flow framework with Spring Boot for rapid application development.
+
+### Use cases examples included
+* AI Assisted chat moderation (Retrieval Augmented Generation")
+  * Model: gpt-3.5-turbo-0613
+* AI Assisted chat moderation (Finetuned)
+  * Model: fine tuned gpt-3.5-turbo-0613 model
+* Multiuser AI chatBot (Using Astra DB as LLM Memory)
+  * ModeL gpt-3.5-turbo
+
+### Screenshot
+![img.png](img.png)
 
 ## Running the application
 

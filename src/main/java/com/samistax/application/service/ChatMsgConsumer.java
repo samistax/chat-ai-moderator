@@ -327,8 +327,8 @@ public class ChatMsgConsumer {
 
         } catch (Exception ex) {
             System.out.println("Exception: " + ex);
+            response = ex.getMessage();
         }
-
         return response;
     }
     private String callChatCompletionWithCallbackFunction(String userId, String prompt, int memorySize) {

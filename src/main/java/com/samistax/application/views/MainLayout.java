@@ -1,6 +1,7 @@
 package com.samistax.application.views;
 
 import com.samistax.application.views.chat.ChatView;
+import com.samistax.application.views.files.FileInputView;
 import com.samistax.application.views.userlist.UserListView;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
@@ -42,7 +43,6 @@ public class MainLayout extends AppLayout {
         H1 appName = new H1("Chat AI Moderator");
         appName.addClassNames(LumoUtility.FontSize.LARGE, LumoUtility.Margin.NONE);
         Header header = new Header(appName);
-
         Scroller scroller = new Scroller(createNavigation());
 
         addToDrawer(header, scroller, createFooter());
@@ -52,7 +52,7 @@ public class MainLayout extends AppLayout {
         SideNav nav = new SideNav();
         nav.addItem(new SideNavItem("User List", UserListView.class, LineAwesomeIcon.USER_FRIENDS_SOLID.create()));
         nav.addItem(new SideNavItem("Chat", ChatView.class, LineAwesomeIcon.COMMENTS.create()));
-
+        nav.addItem(new SideNavItem("File Assistant", FileInputView.class, LineAwesomeIcon.FILE.create()));
         return nav;
     }
 

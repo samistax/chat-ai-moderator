@@ -145,6 +145,17 @@ public class ChatView extends HorizontalLayout {
                 messagePersister);
         list.setSizeFull();
 
+        UserInfo finalUserInfo = userInfo;
+        list.setMessageConfigurator((message, user) -> {
+            if (user.getId().equals("0")) {
+                message.addThemeNames("ai-user");
+            } else if (finalUserInfo != null && user.getId().equals(finalUserInfo.getId())) {
+                message.addThemeNames("current-user");
+            } else {
+                message.addThemeNames("other-user");
+            }
+        });
+
         // `CollaborationMessageInput is a textfield and button, to be able to
         // submit new messages. To avoid having to set the same info into both
         // the message list and message input, the input takes in the list as an

@@ -1,0 +1,45 @@
+:host {
+    flex-direction: row-reverse;
+}
+:host [part="content"] {
+    padding: 10px;
+    border-radius: 10px;
+    flex-grow: 0;
+}
+:host([theme~="current-user"]) {
+    color: var(---lumo-contrast-10pct);
+    flex-direction: row;
+}
+:host([theme~="other-user"]) {
+    color: var(---lumo-contrast-10pct);
+    flex-direction: row-reverse;
+}
+:host([theme~="current-user"]) [part="name"] {
+    font-weight: 600;
+}
+:host([theme~="current-user"]) [part="name"]::before {
+    content: " (You)";
+}
+:host([theme~="current-user"]) [part="content"] {
+    background-color: var(--lumo-shade-20pct);
+}
+:host([theme~="other-user"]) [part="content"] {
+    background-color: var(--lumo-shade-20pct);
+    margin-right: 15px;
+
+}
+
+:host([theme~="ai-user"]) {
+    background-color: var( --lumo-contrast-20pct);
+    color: #fff;
+    border-radius: 15px;
+    font-weight: 500;
+    flex-direction: row;
+}
+:host([theme~="ai-user"]) [part="name"]::after {
+    content: " - event";
+}
+
+:host([theme~="ai-user"]) [part="content"]::after {
+    background-color: var( --lumo-contrast-20pct);
+}

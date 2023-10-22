@@ -9,6 +9,8 @@ import com.theokanning.openai.moderation.ModerationResult;
 import com.theokanning.openai.service.OpenAiService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import javax.annotation.PostConstruct;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
@@ -19,21 +21,18 @@ public class OpenAIClient {
     @Value( "${openai.apikey}" )
     private String OPENAI_API_KEY;
 
-
     private OpenAiService service;
 
     public OpenAIClient() {}
 
-    private void initService() {
-        if ( service == null) {
-            service = new OpenAiService(OPENAI_API_KEY, Duration.ofSeconds(60L));
-        }
+    @PostConstruct
+    private void init() {
+        service = new OpenAiService(OPENAI_API_KEY, Duration.ofSeconds(60L));
     }
     public String getTextEmbedding(String text) {
         return getEmbedding("text-embedding-ada-002", text);
     }
     public String getEmbedding(String model,String text) {
-        initService();
 
         EmbeddingRequest embeddingRequest = EmbeddingRequest.builder()
                 .model(model)
@@ -55,12 +54,10 @@ public class OpenAIClient {
         return "";
     }
     public ChatCompletionResult createChatCompletion(ChatCompletionRequest completionRequest) {
-        initService();
         return service.createChatCompletion(completionRequest);
     }
 
     public ModerationResult moderateContent(String testToBeModarated) {
-        initService();
         ModerationRequest req = ModerationRequest.builder()
                 .model("text-moderation-latest")
                 .input(testToBeModarated).build();
@@ -68,7 +65,6 @@ public class OpenAIClient {
     }
     public OpenAiService getService() {
         // Ensure service handle is created
-        initService();
         return service;
     }
 
