@@ -13,7 +13,11 @@ This project uses Vaadin Flow framework with Spring Boot for rapid application d
   * ModeL gpt-3.5-turbo
 
 ### Screenshot
-![img.png](img.png)
+_AI Chat Moderator_
+![img.png](Screenshot.png)
+
+_File Assistant_
+![img.png](Screenshot2.png)
 
 ## Running the application
 
