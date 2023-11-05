@@ -73,7 +73,7 @@ public class Application implements AppShellConfigurator {
 
                         while ((line = reader.readLine()) != null) {
                             String embedding = aiClient.getTextEmbedding(line);
-                            String query = "insert into demo.policy(id, policy, policy_vector) values (" + id + ", '" + line.replace("'", "") + "', " + embedding + ")";
+                            String query = "INSERT INTO demo.policy(id, policy, policy_vector) VALUES (" + id + ", '" + line.replace("'", "") + "', " + embedding + ")";
                             System.out.println("Query : " + id);
                             astraClient.cqlSession().execute(query);
                             id++;

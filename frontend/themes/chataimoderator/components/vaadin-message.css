@@ -31,15 +31,15 @@
 
 :host([theme~="ai-user"]) {
     background-color: var( --lumo-contrast-20pct);
-    color: #fff;
     border-radius: 15px;
-    font-weight: 500;
     flex-direction: row;
+    padding: 10px;
 }
 :host([theme~="ai-user"]) [part="name"]::after {
-    content: " - event";
+    content: " (System)";
 }
 
 :host([theme~="ai-user"]) [part="content"]::after {
     background-color: var( --lumo-contrast-20pct);
+    padding: 10px;
 }

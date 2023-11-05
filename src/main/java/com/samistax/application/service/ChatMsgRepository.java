@@ -11,4 +11,5 @@ public interface ChatMsgRepository  extends CassandraRepository<ChatMsg, ChatMsg
     List<ChatMsg> findByKeyTopic(final String topic);
     List<ChatMsg> findByKeyTopicAndKeyTimeAfter(final String key, final Instant timestamp);
     List<ChatMsg> findByKeyTopicAndKeyTime(final String key, final Instant timestamp);
+    List<ChatMsg> findByKeyTopicAndUserId(final String key, final String userid);
 }

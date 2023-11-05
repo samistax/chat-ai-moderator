@@ -1,25 +1,39 @@
 package com.samistax.application.views.chat;
 
+import com.datastax.oss.driver.api.core.cql.ResultSet;
 import com.samistax.application.service.ChatMessagePersister;
 import com.samistax.application.service.ChatMsgConsumer;
+import com.samistax.application.service.ChatMsgRepository;
+import com.samistax.application.service.OpenAIClient;
 import com.samistax.application.views.MainLayout;
 import com.samistax.application.views.userlist.Person;
+import com.samistax.astra.entity.ChatMsg;
+import com.theokanning.openai.completion.chat.ChatCompletionChoice;
+import com.theokanning.openai.completion.chat.ChatCompletionRequest;
+import com.theokanning.openai.completion.chat.ChatMessage;
 import com.vaadin.collaborationengine.*;
 import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Aside;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Header;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.page.Page;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.tabs.Tabs.Orientation;
+import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.theme.lumo.LumoUtility.AlignItems;
 import com.vaadin.flow.theme.lumo.LumoUtility.Background;
 import com.vaadin.flow.theme.lumo.LumoUtility.BoxSizing;
@@ -31,6 +45,10 @@ import com.vaadin.flow.theme.lumo.LumoUtility.Margin;
 import com.vaadin.flow.theme.lumo.LumoUtility.Overflow;
 import com.vaadin.flow.theme.lumo.LumoUtility.Padding;
 import com.vaadin.flow.theme.lumo.LumoUtility.Width;
+
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @PageTitle("Chat")
@@ -54,10 +72,19 @@ public class ChatView extends HorizontalLayout {
         private String name;
         private int unread;
         private Span unreadBadge;
+        private MessageManager mm;
 
         private ChatInfo(String name, int unread) {
             this.name = name;
             this.unread = unread;
+        }
+
+        public MessageManager getMm() {
+            return mm;
+        }
+
+        public void setMm(MessageManager mm) {
+            this.mm = mm;
         }
 
         public void resetUnread() {
@@ -85,18 +112,22 @@ public class ChatView extends HorizontalLayout {
         }
     }
 
-    private ChatInfo[] chats = new ChatInfo[]{new ChatInfo("default", 0), new ChatInfo("finetuned", 0),
-            new ChatInfo("ChatBot", 0)};
+    private ChatInfo[] chats = new ChatInfo[]{new ChatInfo("Moderated - RAG", 0), new ChatInfo("Moderated - finetuned", 0),
+            new ChatInfo("Conversation", 0)};
     private ChatInfo currentChat = chats[0];
     private Tabs tabs;
 
     private ChatMessagePersister messagePersister;
     private ChatMsgConsumer consumer;
+    private ChatMsgRepository chatRepository;
+    private final OpenAIClient aiClient;
 
-    public ChatView(ChatMessagePersister messagePersister, ChatMsgConsumer consumer) {
+    public ChatView(ChatMessagePersister messagePersister, ChatMsgConsumer consumer, ChatMsgRepository chatRepository, OpenAIClient aiClient) {
 
         this.messagePersister = messagePersister;
         this.consumer = consumer;
+        this.chatRepository = chatRepository;
+        this.aiClient = aiClient;
 
         addClassNames("chat-view", Width.FULL, Display.FLEX, Flex.AUTO);
         setSpacing(false);
@@ -128,7 +159,7 @@ public class ChatView extends HorizontalLayout {
                     chat.incrementUnread();
                 }
             });
-
+            chat.setMm(mm);
             tabs.add(createTab(chat));
         }
         tabs.setOrientation(Orientation.VERTICAL);
@@ -145,17 +176,16 @@ public class ChatView extends HorizontalLayout {
                 messagePersister);
         list.setSizeFull();
 
-        UserInfo finalUserInfo = userInfo;
+        final UserInfo finalUserInfo = userInfo;
         list.setMessageConfigurator((message, user) -> {
             if (user.getId().equals("0")) {
                 message.addThemeNames("ai-user");
-            } else if (finalUserInfo != null && user.getId().equals(finalUserInfo.getId())) {
+            } else if (user.getId().equals(finalUserInfo.getId())) {
                 message.addThemeNames("current-user");
             } else {
                 message.addThemeNames("other-user");
             }
         });
-
         // `CollaborationMessageInput is a textfield and button, to be able to
         // submit new messages. To avoid having to set the same info into both
         // the message list and message input, the input takes in the list as an
@@ -163,8 +193,55 @@ public class ChatView extends HorizontalLayout {
         CollaborationMessageInput input = new CollaborationMessageInput(list);
         input.setWidthFull();
 
-        // Give CollaborationEngine handle for consumer to publish messages
-        this.consumer.setCe(CollaborationEngine.getInstance());
+        // Give ChatMsgConsumer a UI component handle to be able to publish messages ( received from Pulsar)
+        this.consumer.setChatView(this);
+
+        // Change the topic id of the chat when a new tab is selected
+        tabs.addSelectedChangeListener(event -> {
+            currentChat = ((ChatTab) event.getSelectedTab()).getChatInfo();
+            currentChat.resetUnread();
+            list.setTopic(currentChat.getCollaborationTopic());
+        });
+        // Add listener to catch new chat messages
+        TextField msgField = new TextField();
+        msgField.setPlaceholder("Message");
+
+        Button button = new Button("Send", VaadinIcon.PAPERPLANE.create());
+        button.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        msgField.addValueChangeListener(vce ->
+            System.out.println("Message value changed: " + vce.getValue())
+        );
+        list.setSubmitter(activationContext -> {
+            button.setEnabled(true);
+            Registration registration = button.addClickListener(
+                    event -> {
+                        String message = msgField.getValue();
+                        if ( message.length() > 0 ) {
+
+                            activationContext.appendMessage(message);
+                            String topic = currentChat.getCollaborationTopic();
+
+                            System.out.println("finalUserInfo: " + finalUserInfo.getName());
+                            System.out.println("CurrentChat topic: " + topic);
+                            // If not moderation chat channels, then we are using conversational chat channel and need to retrieve AI response
+                            if (!topic.contains("Moderated")) {
+                                String promptResponse = callChatCompletion(currentChat.getCollaborationTopic(), finalUserInfo.getId(), message, 10);
+                                UserInfo botUser = new UserInfo("0", "system");
+                                CollaborationMessage botMessage = new CollaborationMessage(botUser, promptResponse, Instant.now());
+                                currentChat.getMm().submit(botMessage);
+                                msgField.clear();
+                            }
+                        }
+                    }
+            );
+
+            return () -> {
+                registration.remove();
+                button.setEnabled(false);
+            };
+        });
+
+
 
         // Layouting
         VerticalLayout chatContainer = new VerticalLayout();
@@ -186,17 +263,18 @@ public class ChatView extends HorizontalLayout {
 
         side.add(header, tabs);
 
-        chatContainer.add(list, input);
+        HorizontalLayout inputLayout = new HorizontalLayout(msgField, button);
+        msgField.setWidth(80, Unit.PERCENTAGE);
+        button.setWidth(20, Unit.PERCENTAGE);
+        inputLayout.setClassName("messageInput");
+        msgField.setClassName("messageInput");
+        button.setClassName("messageInput");
+        inputLayout.setWidthFull();
+
+        chatContainer.add(list, inputLayout);
         add(chatContainer, side);
         setSizeFull();
         expand(list);
-
-        // Change the topic id of the chat when a new tab is selected
-        tabs.addSelectedChangeListener(event -> {
-            currentChat = ((ChatTab) event.getSelectedTab()).getChatInfo();
-            currentChat.resetUnread();
-            list.setTopic(currentChat.getCollaborationTopic());
-        });
     }
 
     private ChatTab createTab(ChatInfo chat) {
@@ -225,5 +303,44 @@ public class ChatView extends HorizontalLayout {
     private void setMobile(boolean mobile) {
         tabs.setOrientation(mobile ? Orientation.HORIZONTAL : Orientation.VERTICAL);
     }
+    private String callChatCompletion(String topicId, String userId, String prompt, int memorySize) {
+        String response = "";
 
+
+        List<ChatMessage> messages = new ArrayList<>();
+        // Retrieve last messages from database ( fetch memory items for LLM)
+        //List<ChatMsg> messageHistory = chatRepository.findByKeyTopic(topicId);
+        List<ChatMsg> messageHistory = chatRepository.findByKeyTopicAndUserId(topicId, userId);
+
+        // Start by giving prompt instructions
+        messages.add(new ChatMessage("system", "You are a nice chatbot having a conversation with a human. Use chatHistory function to access past conversation or if the user asks something personal."));
+
+        messageHistory.forEach(row -> {
+            messages.add(new ChatMessage("user",row.getText(), row.getUserId()));
+        });
+
+        // add user input as the last message
+        ChatMessage userPrompt = new ChatMessage("user", prompt);
+        userPrompt.setName(userId);
+        messages.add(userPrompt);
+
+        try {
+            // Build Chat Completion Request
+            ChatCompletionRequest completionRequest = ChatCompletionRequest.builder()
+                    .messages(messages)
+                    .model("gpt-3.5-turbo")
+                    .maxTokens(256)
+                    .build();
+            List<ChatCompletionChoice> completionChoices = aiClient.createChatCompletion(completionRequest).getChoices();
+            response = completionChoices.get(0).getMessage().getContent();
+
+            System.out.println("callChatCompletion: model used ->  " + completionRequest.getModel());
+            System.out.println("callChatCompletion: user msg ->  " + messages.toString());
+
+        } catch (Exception ex) {
+            System.out.println("Exception: " + ex);
+            response = ex.getMessage();
+        }
+        return response;
+    }
 }

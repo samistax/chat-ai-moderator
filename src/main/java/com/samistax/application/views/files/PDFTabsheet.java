@@ -2,6 +2,7 @@ package com.samistax.application.views.files;
 
 import com.samistax.application.service.AstraVectorService;
 import com.samistax.application.service.OpenAIClient;
+import com.theokanning.openai.embedding.Embedding;
 import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -85,7 +86,6 @@ public class PDFTabsheet extends FileInputTabsheet {
             System.out.println("Upload started : " + upload_started);
         });
 
-
         upload.addFinishedListener(e -> {
 
             try {
@@ -110,6 +110,11 @@ public class PDFTabsheet extends FileInputTabsheet {
                             //embeddings = getEmbeddings(paragraphs);
                             embeddings = getJsonDocsWithEmbeddingsMultiThread(paragraphs, "chatId1" ,e.getFileName());
                             duration_embedding = System.currentTimeMillis() - embeddingStartTime;
+                            // Test alternative, Open AI request with multiple texts to be embedded.
+                            long fileStart = System.currentTimeMillis();
+                           // List<ChatFile> embeddedFiles = this.getChatFile(paragraphs, "chatId1", e.getFileName());
+                           // System.out.println("File embeddings : " + embeddedFiles.size() + " in "+(System.currentTimeMillis()- fileStart)+" ms." );
+
 
                             Button storeBtn = new Button("Store vectors");
                             storeBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
@@ -119,9 +124,8 @@ public class PDFTabsheet extends FileInputTabsheet {
                                 duration_vector_store = System.currentTimeMillis() - storeStartTime;
                                 statistics.add(createStatComponent("Document Stored", duration_vector_store + " ms", null));
 
-                                // TODO: Add stats for firs read after write
+                                // TODO: Add stats for first read after write
                                 vstore.findById(docs.get(0));
-
 
                             });
 
@@ -236,6 +240,7 @@ public class PDFTabsheet extends FileInputTabsheet {
         return embeddings;
     }
 
+
     public List<JsonDocument> getJsonDocsWithEmbeddings(List<String> paragraphs, String chatId , String fileName) {
 
         List<JsonDocument> embeddings = new ArrayList<>();
@@ -260,6 +265,24 @@ public class PDFTabsheet extends FileInputTabsheet {
         }
         return embeddings;
     }
+    public List<ChatFile> getChatFile(List<String> paragraphs, String chatId , String fileName) {
+
+        List<ChatFile> results = new ArrayList<>();
+        List<Embedding> embeddings = aiClient.getEmbeddings(paragraphs);
+
+        // Embed paragraphs
+        int i = 0;
+      /*  for (Embedding e : embeddings ) {
+                ChatFile chatFile = new ChatFile((i+1), fileName, chatId, paragraphs.get(i));
+                chatFile.setVector(e.getEmbedding());
+                results.add(chatFile);
+            i = i+1;
+        }
+
+       */
+        return results;
+    }
+
     public float[] convertStringArrayToFloatArray(String[] stringArray) {
         float[] floatArray = new float[stringArray.length];
         for (int i = 0; i < stringArray.length; i++) {

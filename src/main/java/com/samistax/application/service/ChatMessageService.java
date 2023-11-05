@@ -54,6 +54,15 @@ public class ChatMessageService {
         System.out.println("findAllMessagesSince returned  " +response.size() + " messages!!!" );
         return response;
     }
+    public List<ChatMsg> findAllMessagesByUserId(String topic, String userid) {
+
+        System.out.println("findAllMessagesByUserId. userid: " + userid );
+        long startTime = System.currentTimeMillis();
+        List<ChatMsg> response = repository.findByKeyTopicAndUserId(topic, userid);
+        printRequestDuration("findAllMessagesByUserId("+topic+","+userid+"): ", startTime);
+        System.out.println("findAllMessagesByUserId returned  " +response.size() + " messages" );
+        return response;
+    }
 
     // Start of Producer methods
     public ChatMsg saveMessage(ChatMsg entity) {
