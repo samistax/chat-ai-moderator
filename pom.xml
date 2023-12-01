@@ -118,15 +118,14 @@
         </dependency>
         <dependency>
             <groupId>com.datastax.astra</groupId>
-            <artifactId>astra-sdk</artifactId>
-            <version>0.7.0</version>
+            <artifactId>astra-db-client</artifactId>
+            <version>1.0</version>
         </dependency>
         <dependency>
             <groupId>com.datastax.astra</groupId>
-            <artifactId>astra-sdk-vector</artifactId>
-            <version>0.7.0</version>
+            <artifactId>astra-sdk</artifactId>
+            <version>1.0.1</version>
         </dependency>
-
     </dependencies>
 
     <build>

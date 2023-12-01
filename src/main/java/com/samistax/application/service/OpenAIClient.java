@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,10 +32,16 @@ public class OpenAIClient {
     private void init() {
         service = new OpenAiService(OPENAI_API_KEY, Duration.ofSeconds(60L));
     }
+    @PreDestroy
+    private void tearDown() {
+        service.shutdownExecutor();
+    }
+
     public String getTextEmbedding(String text) {
         List<Float> embedding = getEmbedding("text-embedding-ada-002", text);
         return  embedding.toString();
     }
+
     public List<Embedding> getEmbeddings(List<String> textArray) {
         EmbeddingRequest embeddingRequest = EmbeddingRequest.builder()
                 .model("text-embedding-ada-002")
